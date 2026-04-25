@@ -1,5 +1,5 @@
 {
-  "name": "agentreach",
+  "name": "airprompt",
   "version": "0.0.1",
   "description": "Set up remote terminal access for AI agent workflows in minutes",
   "type": "module",
