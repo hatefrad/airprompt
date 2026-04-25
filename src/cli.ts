@@ -6,10 +6,15 @@ import { checkSSH } from './steps/ssh.js'
 import { getTailscaleIP } from './steps/ip.js'
 import { parseOptions } from './options.js'
 import { runStatus } from './commands/status.js'
-import { info, warn, printInstructions, printCleanup } from './ui.js'
+import { info, warn, printHelp, printInstructions, printCleanup } from './ui.js'
 
 export async function runAirprompt(args: string[], version: string): Promise<number> {
   console.log(chalk.bold(`\nairprompt v${version}\n`))
+
+  if (args[0] === 'help' || args.includes('--help')) {
+    printHelp(version)
+    return 0
+  }
 
   if (args[0] === 'status') {
     const unknown = args.slice(1)

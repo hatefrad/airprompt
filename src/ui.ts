@@ -39,3 +39,16 @@ export function printInstructions(ip: string): void {
 export function printCleanup(): void {
   console.log(chalk.dim('  To undo: sudo systemsetup -setremotelogin off\n'))
 }
+
+export function printHelp(version: string): void {
+  console.log(`
+Usage: airprompt [command] [options]
+
+Commands:
+  status       Check whether Tailscale, tmux, and SSH are set up
+
+Options:
+  --dry-run    Preview changes without installing or enabling anything
+  --help       Show this help message
+  `.trim() + '\n')
+}

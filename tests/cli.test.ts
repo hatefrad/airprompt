@@ -27,6 +27,7 @@ vi.mock('../src/commands/status.js', () => ({
 vi.mock('../src/ui.js', () => ({
   info: vi.fn(),
   warn: vi.fn(),
+  printHelp: vi.fn(),
   printInstructions: vi.fn(),
   printCleanup: vi.fn(),
 }))
@@ -77,5 +78,21 @@ describe('runAirprompt', () => {
     expect(getTailscaleIP).toHaveBeenCalled()
     expect(printInstructions).not.toHaveBeenCalled()
     expect(printCleanup).not.toHaveBeenCalled()
+  })
+
+  it('prints help and exits 0 for --help flag', async () => {
+    const { printHelp } = await import('../src/ui.js')
+    const { runAirprompt } = await import('../src/cli.js')
+
+    await expect(runAirprompt(['--help'], '0.1.0')).resolves.toBe(0)
+    expect(printHelp).toHaveBeenCalledWith('0.1.0')
+  })
+
+  it('prints help and exits 0 for help subcommand', async () => {
+    const { printHelp } = await import('../src/ui.js')
+    const { runAirprompt } = await import('../src/cli.js')
+
+    await expect(runAirprompt(['help'], '0.1.0')).resolves.toBe(0)
+    expect(printHelp).toHaveBeenCalledWith('0.1.0')
   })
 })
