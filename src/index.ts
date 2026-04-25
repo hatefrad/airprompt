@@ -11,7 +11,7 @@ import { printInstructions } from './ui.js'
 
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
 
-console.log(chalk.bold(`\nagentreach v${version}\n`))
+console.log(chalk.bold(`\nairprompt v${version}\n`))
 
 try {
   await checkPlatform()

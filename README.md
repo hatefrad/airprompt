@@ -1,4 +1,4 @@
-# agentreach
+# airprompt
 
 Set up remote terminal access for AI agent workflows in minutes.
 
@@ -7,7 +7,7 @@ Run this on your Mac and you'll be able to SSH into your terminal from your phon
 ## Usage
 
 ```bash
-npx agentreach
+npx airprompt
 ```
 
 That's it. The CLI will:

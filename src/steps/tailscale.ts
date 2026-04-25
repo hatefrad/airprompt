@@ -16,7 +16,7 @@ async function waitForTailscaleConnection(): Promise<void> {
   try {
     await execa('tailscale', ['ip', '-4'])
   } catch (err) {
-    fail('Tailscale not connected. Open the Tailscale app and sign in, then re-run agentreach.')
+    fail('Tailscale not connected. Open the Tailscale app and sign in, then re-run airprompt.')
     throw err
   }
 }

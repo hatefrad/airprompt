@@ -14,7 +14,7 @@ export async function checkTmux(): Promise<void> {
   try {
     await execa('which', ['brew'])
   } catch {
-    fail('Homebrew not found. Install it from https://brew.sh then re-run agentreach.')
+    fail('Homebrew not found. Install it from https://brew.sh then re-run airprompt.')
     throw new Error('brew not found')
   }
 
