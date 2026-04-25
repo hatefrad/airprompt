@@ -1,17 +1,33 @@
 import { execa } from 'execa'
+import { createInterface } from 'readline'
 import type { AirpromptOptions } from '../options.js'
-import { success, info, fail } from '../ui.js'
+import { success, info, warn, fail } from '../ui.js'
+
+async function prompt(question: string): Promise<void> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  return new Promise((resolve) => {
+    rl.question(question, () => {
+      rl.close()
+      resolve()
+    })
+  })
+}
+
+async function isSSHOn(): Promise<boolean> {
+  const { stdout } = await execa('sudo', ['systemsetup', '-getremotelogin'], { stdin: 'inherit', stderr: 'inherit' })
+  return stdout.includes('On')
+}
 
 export async function checkSSH(options: AirpromptOptions = { dryRun: false }): Promise<void> {
-  let stdout: string
+  let on: boolean
   try {
-    ;({ stdout } = await execa('sudo', ['systemsetup', '-getremotelogin'], { stdin: 'inherit', stderr: 'inherit' }))
+    on = await isSSHOn()
   } catch (err) {
     fail('Could not check SSH status. Run: sudo systemsetup -getremotelogin')
     throw err
   }
 
-  if (stdout.includes('On')) {
+  if (on) {
     success('SSH (Remote Login) enabled')
     return
   }
@@ -25,8 +41,22 @@ export async function checkSSH(options: AirpromptOptions = { dryRun: false }): P
   try {
     await execa('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
     success('SSH enabled')
-  } catch (err) {
-    fail('Failed to enable SSH. Run manually: sudo systemsetup -setremotelogin on')
-    throw err
+  } catch (err: any) {
+    const needsFDA = (err.stderr ?? err.message ?? '').includes('Full Disk Access')
+    if (needsFDA) {
+      warn('macOS requires Full Disk Access to enable Remote Login programmatically.')
+      warn('Opening System Settings → Sharing — toggle "Remote Login" on, then come back.')
+      await execa('open', ['x-apple.systempreferences:com.apple.preferences.sharing'])
+      await prompt('Press Enter once Remote Login is enabled in System Settings...')
+      const nowOn = await isSSHOn()
+      if (!nowOn) {
+        fail('Remote Login still off. Enable it in System Settings → Sharing → Remote Login.')
+        throw new Error('SSH not enabled')
+      }
+      success('SSH enabled')
+    } else {
+      fail('Failed to enable SSH. Run manually: sudo systemsetup -setremotelogin on')
+      throw err
+    }
   }
 }
