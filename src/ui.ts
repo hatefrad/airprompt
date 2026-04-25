@@ -30,6 +30,9 @@ export function printInstructions(ip: string): void {
   console.log('  2. Install Termius')
   console.log(`  3. Add host: ${chalk.cyan(ip)}`)
   console.log('  4. Connect and run: ' + chalk.cyan('tmux new -s work'))
+  console.log('\n  SSH keys:')
+  console.log('  ' + chalk.cyan('ssh-keygen -t ed25519 -C "airprompt"'))
+  console.log('  ' + chalk.cyan(`ssh-copy-id <mac-username>@${ip}`) + chalk.dim('  # if available'))
   console.log(line + '\n')
 }
 

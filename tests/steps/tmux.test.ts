@@ -47,6 +47,16 @@ describe('checkTmux', () => {
     expect(execa).toHaveBeenCalledWith('brew', ['install', 'tmux'])
   })
 
+  it('does not install tmux when missing in dry-run mode', async () => {
+    const { execa } = await import('execa')
+    vi.mocked(execa).mockRejectedValueOnce(new Error('not found')) // which tmux
+
+    const { checkTmux } = await import('../../src/steps/tmux.js')
+    await expect(checkTmux({ dryRun: true })).resolves.toBeUndefined()
+    expect(execa).not.toHaveBeenCalledWith('brew', ['install', 'tmux'])
+    expect(execa).toHaveBeenCalledTimes(1)
+  })
+
   it('rejects when brew itself is not installed', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)

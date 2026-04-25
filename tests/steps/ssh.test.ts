@@ -41,6 +41,16 @@ describe('checkSSH', () => {
     expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'])
   })
 
+  it('does not enable SSH when remote login is off in dry-run mode', async () => {
+    const { execa } = await import('execa')
+    vi.mocked(execa).mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)
+
+    const { checkSSH } = await import('../../src/steps/ssh.js')
+    await expect(checkSSH({ dryRun: true })).resolves.toBeUndefined()
+    expect(execa).not.toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'])
+    expect(execa).toHaveBeenCalledTimes(1)
+  })
+
   it('rejects when enabling SSH fails', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)

@@ -1,12 +1,18 @@
 import { execa } from 'execa'
+import type { AirpromptOptions } from '../options.js'
 import { success, info, fail, spinner } from '../ui.js'
 
-export async function checkTmux(): Promise<void> {
+export async function checkTmux(options: AirpromptOptions = { dryRun: false }): Promise<void> {
   try {
     await execa('which', ['tmux'])
     success('tmux installed')
     return
   } catch {
+    if (options.dryRun) {
+      info('[dry-run] Would install tmux: brew install tmux')
+      return
+    }
+
     info('tmux not found — installing via Homebrew...')
   }
 

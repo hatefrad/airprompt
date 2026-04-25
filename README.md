@@ -10,6 +10,12 @@ Run this on your Mac and you'll be able to SSH into your terminal from your phon
 npx airprompt
 ```
 
+Preview the setup without installing or enabling anything:
+
+```bash
+npx airprompt --dry-run
+```
+
 That's it. The CLI will:
 
 1. Check you're on macOS
@@ -47,6 +53,17 @@ Ctrl+B, D
 # Reattach from your phone
 tmux attach -t work
 ```
+
+## SSH keys
+
+For regular use, prefer SSH keys over passwords:
+
+```bash
+ssh-keygen -t ed25519 -C "airprompt"
+ssh-copy-id <mac-username>@<tailscale-ip>
+```
+
+If `ssh-copy-id` is not installed, append the public key from `~/.ssh/id_ed25519.pub` to `~/.ssh/authorized_keys` on your Mac.
 
 ## Requirements
 

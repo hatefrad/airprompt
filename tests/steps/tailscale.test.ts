@@ -54,6 +54,16 @@ describe('checkTailscale', () => {
     expect(execa).toHaveBeenCalledWith('brew', ['install', '--cask', 'tailscale'])
   })
 
+  it('does not install tailscale when missing in dry-run mode', async () => {
+    const { execa } = await import('execa')
+    vi.mocked(execa).mockRejectedValueOnce(new Error('not found')) // which tailscale
+
+    const { checkTailscale } = await import('../../src/steps/tailscale.js')
+    await expect(checkTailscale({ dryRun: true })).resolves.toBeUndefined()
+    expect(execa).not.toHaveBeenCalledWith('brew', ['install', '--cask', 'tailscale'])
+    expect(execa).toHaveBeenCalledTimes(1)
+  })
+
   it('rejects when not connected after install (no IP)', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
