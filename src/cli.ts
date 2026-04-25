@@ -5,10 +5,15 @@ import { checkTmux } from './steps/tmux.js'
 import { checkSSH } from './steps/ssh.js'
 import { getTailscaleIP } from './steps/ip.js'
 import { parseOptions } from './options.js'
+import { runStatus } from './commands/status.js'
 import { info, warn, printInstructions, printCleanup } from './ui.js'
 
 export async function runAirprompt(args: string[], version: string): Promise<number> {
   console.log(chalk.bold(`\nairprompt v${version}\n`))
+
+  if (args[0] === 'status') {
+    return runStatus()
+  }
 
   try {
     const { options, unknown } = parseOptions(args)
