@@ -22,30 +22,30 @@ describe('checkSSH', () => {
     vi.clearAllMocks()
   })
 
-  it('resolves when remote login is already on', async () => {
+  it('resolves when SSH is already listening on port 22', async () => {
     const { execa } = await import('execa')
-    vi.mocked(execa).mockResolvedValueOnce({ stdout: 'Remote Login: On' } as any)
+    vi.mocked(execa).mockResolvedValueOnce({} as any) // nc -z -w1 localhost 22
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-getremotelogin'], { stdin: 'inherit', stderr: 'inherit' })
+    expect(execa).toHaveBeenCalledWith('nc', ['-z', '-w1', 'localhost', '22'])
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
-  it('enables SSH when remote login is off', async () => {
+  it('enables SSH when port 22 is not listening', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
-      .mockResolvedValueOnce({} as any)                               // setremotelogin on
+      .mockRejectedValueOnce(new Error('connection refused')) // nc check — SSH off
+      .mockResolvedValueOnce({} as any)                       // setremotelogin on
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
     expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
   })
 
-  it('does not enable SSH when remote login is off in dry-run mode', async () => {
+  it('does not enable SSH in dry-run mode', async () => {
     const { execa } = await import('execa')
-    vi.mocked(execa).mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)
+    vi.mocked(execa).mockRejectedValueOnce(new Error('connection refused')) // nc check
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH({ dryRun: true })).resolves.toBeUndefined()
@@ -56,33 +56,25 @@ describe('checkSSH', () => {
   it('falls back to System Settings when enable fails and succeeds if user enables it', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
-      .mockRejectedValueOnce(new Error('Full Disk Access'))            // setremotelogin fails
-      .mockResolvedValueOnce({} as any)                               // open System Settings
-      .mockResolvedValueOnce({ stdout: 'Remote Login: On' } as any)  // getremotelogin after user
+      .mockRejectedValueOnce(new Error('connection refused')) // nc — SSH off
+      .mockRejectedValueOnce(new Error('Full Disk Access'))   // setremotelogin fails
+      .mockResolvedValueOnce({} as any)                       // open System Settings
+      .mockResolvedValueOnce({} as any)                       // nc — SSH now on
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
     expect(execa).toHaveBeenCalledWith('open', ['x-apple.systempreferences:com.apple.preferences.sharing'])
   })
 
-  it('rejects when enable fails and user does not enable SSH in System Settings', async () => {
+  it('rejects when user does not enable SSH in System Settings', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
-      .mockRejectedValueOnce(new Error('Full Disk Access'))            // setremotelogin fails
-      .mockResolvedValueOnce({} as any)                               // open System Settings
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin still off
+      .mockRejectedValueOnce(new Error('connection refused')) // nc — SSH off
+      .mockRejectedValueOnce(new Error('Full Disk Access'))   // setremotelogin fails
+      .mockResolvedValueOnce({} as any)                       // open System Settings
+      .mockRejectedValueOnce(new Error('connection refused')) // nc — still off
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).rejects.toThrow('SSH not enabled')
-  })
-
-  it('rejects when SSH status check fails', async () => {
-    const { execa } = await import('execa')
-    vi.mocked(execa).mockRejectedValueOnce(new Error('sudo failed'))
-
-    const { checkSSH } = await import('../../src/steps/ssh.js')
-    await expect(checkSSH()).rejects.toThrow('sudo failed')
   })
 })

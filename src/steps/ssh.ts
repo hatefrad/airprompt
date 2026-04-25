@@ -14,8 +14,12 @@ async function prompt(question: string): Promise<void> {
 }
 
 async function isSSHOn(): Promise<boolean> {
-  const { stdout } = await execa('sudo', ['systemsetup', '-getremotelogin'], { stdin: 'inherit', stderr: 'inherit' })
-  return stdout.includes('On')
+  try {
+    await execa('nc', ['-z', '-w1', 'localhost', '22'])
+    return true
+  } catch {
+    return false
+  }
 }
 
 export async function checkSSH(options: AirpromptOptions = { dryRun: false }): Promise<void> {
@@ -23,7 +27,7 @@ export async function checkSSH(options: AirpromptOptions = { dryRun: false }): P
   try {
     on = await isSSHOn()
   } catch (err) {
-    fail('Could not check SSH status. Run: sudo systemsetup -getremotelogin')
+    fail('Could not check SSH status.')
     throw err
   }
 
