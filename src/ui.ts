@@ -32,3 +32,7 @@ export function printInstructions(ip: string): void {
   console.log('  4. Connect and run: ' + chalk.cyan('tmux new -s work'))
   console.log(line + '\n')
 }
+
+export function printCleanup(): void {
+  console.log(chalk.dim('  To undo: sudo systemsetup -setremotelogin off\n'))
+}

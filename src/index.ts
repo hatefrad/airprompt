@@ -7,7 +7,7 @@ import { checkTailscale } from './steps/tailscale.js'
 import { checkTmux } from './steps/tmux.js'
 import { checkSSH } from './steps/ssh.js'
 import { getTailscaleIP } from './steps/ip.js'
-import { printInstructions } from './ui.js'
+import { printInstructions, printCleanup } from './ui.js'
 
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
 
@@ -20,6 +20,7 @@ try {
   await checkSSH()
   const ip = await getTailscaleIP()
   printInstructions(ip)
+  printCleanup()
 } catch {
   process.exit(1)
 }
