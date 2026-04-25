@@ -40,7 +40,7 @@ export function printCleanup(): void {
   console.log(chalk.dim('  To undo: sudo systemsetup -setremotelogin off\n'))
 }
 
-export function printHelp(version: string): void {
+export function printHelp(): void {
   console.log(`
 Usage: airprompt [command] [options]
 

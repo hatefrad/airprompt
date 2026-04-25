@@ -85,7 +85,7 @@ describe('runAirprompt', () => {
     const { runAirprompt } = await import('../src/cli.js')
 
     await expect(runAirprompt(['--help'], '0.1.0')).resolves.toBe(0)
-    expect(printHelp).toHaveBeenCalledWith('0.1.0')
+    expect(printHelp).toHaveBeenCalled()
   })
 
   it('prints help and exits 0 for help subcommand', async () => {
@@ -93,6 +93,6 @@ describe('runAirprompt', () => {
     const { runAirprompt } = await import('../src/cli.js')
 
     await expect(runAirprompt(['help'], '0.1.0')).resolves.toBe(0)
-    expect(printHelp).toHaveBeenCalledWith('0.1.0')
+    expect(printHelp).toHaveBeenCalled()
   })
 })

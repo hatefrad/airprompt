@@ -12,7 +12,7 @@ export async function runAirprompt(args: string[], version: string): Promise<num
   console.log(chalk.bold(`\nairprompt v${version}\n`))
 
   if (args[0] === 'help' || args.includes('--help')) {
-    printHelp(version)
+    printHelp()
     return 0
   }
 
