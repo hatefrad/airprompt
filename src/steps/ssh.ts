@@ -5,7 +5,7 @@ import { success, info, fail } from '../ui.js'
 export async function checkSSH(options: AirpromptOptions = { dryRun: false }): Promise<void> {
   let stdout: string
   try {
-    ;({ stdout } = await execa('sudo', ['systemsetup', '-getremotelogin']))
+    ;({ stdout } = await execa('sudo', ['systemsetup', '-getremotelogin'], { stdin: 'inherit', stderr: 'inherit' }))
   } catch (err) {
     fail('Could not check SSH status. Run: sudo systemsetup -getremotelogin')
     throw err
@@ -22,14 +22,11 @@ export async function checkSSH(options: AirpromptOptions = { dryRun: false }): P
   }
 
   info('SSH is off — enabling Remote Login...')
-  const { spinner } = await import('../ui.js')
-  const spin = spinner('Enabling SSH...')
   try {
-    await execa('sudo', ['systemsetup', '-setremotelogin', 'on'])
-    spin.succeed('SSH enabled')
+    await execa('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
+    success('SSH enabled')
   } catch (err) {
-    spin.fail('Failed to enable SSH')
-    fail('Run manually: sudo systemsetup -setremotelogin on')
+    fail('Failed to enable SSH. Run manually: sudo systemsetup -setremotelogin on')
     throw err
   }
 }

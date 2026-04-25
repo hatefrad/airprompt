@@ -4,16 +4,9 @@ vi.mock('execa')
 vi.mock('../../src/ui.js')
 
 describe('checkSSH', () => {
-  let mockSpinner: any
-
   beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
-
-    mockSpinner = { succeed: vi.fn(), fail: vi.fn() }
-
-    const uiModule = await import('../../src/ui.js')
-    vi.mocked(uiModule.spinner).mockReturnValue(mockSpinner)
   })
 
   it('resolves when remote login is already on', async () => {
@@ -22,19 +15,19 @@ describe('checkSSH', () => {
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-getremotelogin'])
+    expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-getremotelogin'], { stdin: 'inherit', stderr: 'inherit' })
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
   it('enables SSH when remote login is off', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
-      .mockResolvedValueOnce({} as any)                               // setremotelogin on
+      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)
+      .mockResolvedValueOnce({} as any)
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'])
+    expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
   })
 
   it('does not enable SSH when remote login is off in dry-run mode', async () => {
@@ -43,15 +36,15 @@ describe('checkSSH', () => {
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH({ dryRun: true })).resolves.toBeUndefined()
-    expect(execa).not.toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'])
+    expect(execa).not.toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
   it('rejects when enabling SSH fails', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
-      .mockRejectedValueOnce(new Error('permission denied'))           // setremotelogin on
+      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)
+      .mockRejectedValueOnce(new Error('permission denied'))
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).rejects.toThrow('permission denied')
