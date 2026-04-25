@@ -1,5 +1,7 @@
 # airprompt
 
+![airprompt setup preview](assets/airprompt.png)
+
 Set up remote terminal access for AI agent workflows in minutes.
 
 Run this on your Mac and you'll be able to SSH into your terminal from your phone — so when Claude or another AI agent needs your input, you can respond from anywhere.
