@@ -18,7 +18,7 @@ describe('runStatus', () => {
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockResolvedValueOnce({ stdout: '100.64.0.1' } as any)               // tailscale ip -4
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)      // which tmux
-      .mockResolvedValueOnce({ stdout: 'Remote Login: On' } as any)         // systemsetup
+      .mockResolvedValueOnce({ stdout: '1234' } as any)                     // pgrep sshd
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
@@ -33,7 +33,7 @@ describe('runStatus', () => {
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('not found'))                        // which tailscale
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)     // which tmux
-      .mockResolvedValueOnce({ stdout: 'Remote Login: On' } as any)        // systemsetup
+      .mockResolvedValueOnce({ stdout: '1234' } as any)                    // pgrep sshd
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
@@ -49,7 +49,7 @@ describe('runStatus', () => {
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockRejectedValueOnce(new Error('no IP'))                            // tailscale ip -4
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)     // which tmux
-      .mockResolvedValueOnce({ stdout: 'Remote Login: On' } as any)        // systemsetup
+      .mockResolvedValueOnce({ stdout: '1234' } as any)                    // pgrep sshd
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
@@ -65,7 +65,7 @@ describe('runStatus', () => {
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockResolvedValueOnce({ stdout: '100.64.0.1' } as any)               // tailscale ip -4
       .mockRejectedValueOnce(new Error('not found'))                        // which tmux
-      .mockResolvedValueOnce({ stdout: 'Remote Login: On' } as any)        // systemsetup
+      .mockResolvedValueOnce({ stdout: '1234' } as any)                    // pgrep sshd
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
@@ -80,8 +80,8 @@ describe('runStatus', () => {
     vi.mocked(execa)
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockResolvedValueOnce({ stdout: '100.64.0.1' } as any)               // tailscale ip -4
-      .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)     // which tmux
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)       // systemsetup
+      .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)      // which tmux
+      .mockRejectedValueOnce(new Error('no process'))                       // pgrep sshd
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
