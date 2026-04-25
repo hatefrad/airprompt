@@ -27,7 +27,7 @@
     "LICENSE"
   ],
   "bin": {
-    "airprompt": "./bin/airprompt.js"
+    "airprompt": "bin/airprompt.js"
   },
   "scripts": {
     "build": "tsc",
