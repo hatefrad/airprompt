@@ -1,3 +1,4 @@
+import { userInfo } from 'os'
 import chalk from 'chalk'
 import ora, { type Ora } from 'ora'
 
@@ -23,16 +24,22 @@ export function spinner(msg: string): Ora {
 
 export function printInstructions(ip: string): void {
   const line = '━'.repeat(40)
+  const user = userInfo().username
   console.log('\n' + line)
   console.log(chalk.bold('  You\'re all set!\n'))
-  console.log('  From your phone:')
-  console.log('  1. Install Tailscale (same account as this Mac)')
-  console.log('  2. Install Termius')
-  console.log(`  3. Add host: ${chalk.cyan(ip)}`)
-  console.log('  4. Connect and run: ' + chalk.cyan('tmux new -s work'))
-  console.log('\n  SSH keys:')
-  console.log('  ' + chalk.cyan('ssh-keygen -t ed25519 -C "airprompt"'))
-  console.log('  ' + chalk.cyan(`ssh-copy-id <mac-username>@${ip}`) + chalk.dim('  # if available'))
+  console.log('  1. Start a tmux session ' + chalk.dim('(run this on your Mac first):'))
+  console.log('     ' + chalk.cyan('tmux new -s work'))
+  console.log()
+  console.log('  2. Install on your phone:')
+  console.log('     • Tailscale ' + chalk.dim('(sign in with the same account as this Mac)'))
+  console.log('     • Termius ' + chalk.dim('(SSH client)'))
+  console.log()
+  console.log('  3. Add host in Termius:')
+  console.log('     Host:  ' + chalk.cyan(ip))
+  console.log('     Login: ' + chalk.cyan(user))
+  console.log()
+  console.log('  4. Connect from your phone and attach:')
+  console.log('     ' + chalk.cyan('tmux attach -t work'))
   console.log(line + '\n')
 }
 
