@@ -20,6 +20,10 @@ vi.mock('../src/steps/ip.js', () => ({
   getTailscaleIP: vi.fn(),
 }))
 
+vi.mock('../src/commands/status.js', () => ({
+  runStatus: vi.fn(),
+}))
+
 vi.mock('../src/ui.js', () => ({
   info: vi.fn(),
   warn: vi.fn(),
@@ -40,6 +44,26 @@ describe('runAirprompt', () => {
     await expect(runAirprompt(['--dryrun'], '0.0.5')).resolves.toBe(1)
     expect(warn).toHaveBeenCalledWith('Unknown option(s): --dryrun')
     expect(checkPlatform).not.toHaveBeenCalled()
+  })
+
+  it('exits before status when unknown status options are provided', async () => {
+    const { runStatus } = await import('../src/commands/status.js')
+    const { warn } = await import('../src/ui.js')
+    const { runAirprompt } = await import('../src/cli.js')
+
+    await expect(runAirprompt(['status', '--bogus'], '0.0.5')).resolves.toBe(1)
+    expect(warn).toHaveBeenCalledWith('Unknown option(s): --bogus')
+    expect(runStatus).not.toHaveBeenCalled()
+  })
+
+  it('runs status when no status options are provided', async () => {
+    const { runStatus } = await import('../src/commands/status.js')
+    vi.mocked(runStatus).mockResolvedValueOnce(0)
+
+    const { runAirprompt } = await import('../src/cli.js')
+
+    await expect(runAirprompt(['status'], '0.0.5')).resolves.toBe(0)
+    expect(runStatus).toHaveBeenCalled()
   })
 
   it('does not print the normal success instructions in dry-run mode', async () => {

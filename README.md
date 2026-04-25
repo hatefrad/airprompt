@@ -16,6 +16,12 @@ Preview the setup without installing or enabling anything:
 npx airprompt --dry-run
 ```
 
+Check your current setup without changing anything:
+
+```bash
+npx airprompt status
+```
+
 That's it. The CLI will:
 
 1. Check you're on macOS
@@ -69,6 +75,10 @@ If `ssh-copy-id` is not installed, append the public key from `~/.ssh/id_ed25519
 
 - macOS
 - [Homebrew](https://brew.sh) (for auto-installing Tailscale and tmux)
+
+## Status checks
+
+`npx airprompt status` checks whether Tailscale is installed and connected, tmux is installed, and macOS Remote Login is enabled. The Remote Login check may ask for administrator permission because macOS requires it for `systemsetup`.
 
 ## Security model
 

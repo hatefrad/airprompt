@@ -12,6 +12,12 @@ export async function runAirprompt(args: string[], version: string): Promise<num
   console.log(chalk.bold(`\nairprompt v${version}\n`))
 
   if (args[0] === 'status') {
+    const unknown = args.slice(1)
+    if (unknown.length > 0) {
+      warn(`Unknown option(s): ${unknown.join(', ')}`)
+      return 1
+    }
+
     return runStatus()
   }
 
