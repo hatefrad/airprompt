@@ -1,6 +1,6 @@
 {
   "name": "airprompt",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Set up remote terminal access for AI agent workflows in minutes",
   "type": "module",
   "license": "MIT",

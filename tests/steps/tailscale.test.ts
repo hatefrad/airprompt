@@ -51,7 +51,7 @@ describe('checkTailscale', () => {
 
     const { checkTailscale } = await import('../../src/steps/tailscale.js')
     await expect(checkTailscale()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('brew', ['install', '--cask', 'tailscale'])
+    expect(execa).toHaveBeenCalledWith('brew', ['install', '--cask', 'tailscale'], { stdio: 'inherit' })
   })
 
   it('does not install tailscale when missing in dry-run mode', async () => {

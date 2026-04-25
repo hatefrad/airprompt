@@ -1,7 +1,7 @@
 import { execa } from 'execa'
 import { createInterface } from 'readline'
 import type { AirpromptOptions } from '../options.js'
-import { success, info, warn, fail, spinner } from '../ui.js'
+import { success, info, warn, fail } from '../ui.js'
 
 async function prompt(question: string): Promise<string> {
   const rl = createInterface({ input: process.stdin, output: process.stdout })
@@ -33,14 +33,12 @@ export async function checkTailscale(options: AirpromptOptions = { dryRun: false
       return
     }
 
-    info('Tailscale not found — installing via Homebrew...')
-    const spin = spinner('Installing Tailscale...')
+    info('Tailscale not found — installing via Homebrew (this may take a few minutes)...')
     try {
-      await execa('brew', ['install', '--cask', 'tailscale'])
-      spin.succeed('Tailscale installed')
+      await execa('brew', ['install', '--cask', 'tailscale'], { stdio: 'inherit' })
+      success('Tailscale installed')
     } catch (err) {
-      spin.fail('Failed to install Tailscale')
-      fail('Install manually: https://tailscale.com/download')
+      fail('Failed to install Tailscale. Install manually: https://tailscale.com/download')
       throw err
     }
     warn('Open the Tailscale app from your Applications folder and sign in.')
