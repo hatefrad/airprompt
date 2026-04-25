@@ -41,22 +41,20 @@ export async function checkSSH(options: AirpromptOptions = { dryRun: false }): P
   try {
     await execa('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
     success('SSH enabled')
-  } catch (err: any) {
-    const needsFDA = (err.stderr ?? err.message ?? '').includes('Full Disk Access')
-    if (needsFDA) {
-      warn('macOS requires Full Disk Access to enable Remote Login programmatically.')
-      warn('Opening System Settings → Sharing — toggle "Remote Login" on, then come back.')
-      await execa('open', ['x-apple.systempreferences:com.apple.preferences.sharing'])
-      await prompt('Press Enter once Remote Login is enabled in System Settings...')
-      const nowOn = await isSSHOn()
-      if (!nowOn) {
-        fail('Remote Login still off. Enable it in System Settings → Sharing → Remote Login.')
-        throw new Error('SSH not enabled')
-      }
-      success('SSH enabled')
-    } else {
-      fail('Failed to enable SSH. Run manually: sudo systemsetup -setremotelogin on')
-      throw err
-    }
+    return
+  } catch {
+    // systemsetup may fail on macOS Ventura+ due to Full Disk Access restrictions — fall through
   }
+
+  // Fall back: open System Settings and let the user enable it manually
+  warn('Could not enable Remote Login automatically (macOS may require Full Disk Access).')
+  warn('Opening System Settings → Sharing — toggle "Remote Login" on, then come back here.')
+  await execa('open', ['x-apple.systempreferences:com.apple.preferences.sharing'])
+  await prompt('Press Enter once Remote Login is enabled in System Settings...')
+  const nowOn = await isSSHOn()
+  if (!nowOn) {
+    fail('Remote Login still off. Enable it in System Settings → Sharing → Remote Login.')
+    throw new Error('SSH not enabled')
+  }
+  success('SSH enabled')
 }

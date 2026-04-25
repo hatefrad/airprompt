@@ -1,7 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('execa')
-vi.mock('../../src/ui.js')
+vi.mock('execa', () => ({ execa: vi.fn() }))
+
+vi.mock('readline', () => ({
+  createInterface: vi.fn(() => ({
+    question: vi.fn((_prompt: string, cb: (ans: string) => void) => cb('')),
+    close: vi.fn(),
+  })),
+}))
+
+vi.mock('../../src/ui.js', () => ({
+  success: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  fail: vi.fn(),
+}))
 
 describe('checkSSH', () => {
   beforeEach(async () => {
@@ -22,8 +35,8 @@ describe('checkSSH', () => {
   it('enables SSH when remote login is off', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)
-      .mockResolvedValueOnce({} as any)
+      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
+      .mockResolvedValueOnce({} as any)                               // setremotelogin on
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
@@ -40,14 +53,29 @@ describe('checkSSH', () => {
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
-  it('rejects when enabling SSH fails', async () => {
+  it('falls back to System Settings when enable fails and succeeds if user enables it', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)
-      .mockRejectedValueOnce(new Error('permission denied'))
+      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
+      .mockRejectedValueOnce(new Error('Full Disk Access'))            // setremotelogin fails
+      .mockResolvedValueOnce({} as any)                               // open System Settings
+      .mockResolvedValueOnce({ stdout: 'Remote Login: On' } as any)  // getremotelogin after user
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
-    await expect(checkSSH()).rejects.toThrow('permission denied')
+    await expect(checkSSH()).resolves.toBeUndefined()
+    expect(execa).toHaveBeenCalledWith('open', ['x-apple.systempreferences:com.apple.preferences.sharing'])
+  })
+
+  it('rejects when enable fails and user does not enable SSH in System Settings', async () => {
+    const { execa } = await import('execa')
+    vi.mocked(execa)
+      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
+      .mockRejectedValueOnce(new Error('Full Disk Access'))            // setremotelogin fails
+      .mockResolvedValueOnce({} as any)                               // open System Settings
+      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin still off
+
+    const { checkSSH } = await import('../../src/steps/ssh.js')
+    await expect(checkSSH()).rejects.toThrow('SSH not enabled')
   })
 
   it('rejects when SSH status check fails', async () => {
