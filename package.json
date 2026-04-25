@@ -1,0 +1,25 @@
+{
+  "name": "agentreach",
+  "version": "1.0.0",
+  "description": "Set up remote terminal access for AI agent workflows in minutes",
+  "type": "module",
+  "bin": {
+    "agentreach": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "execa": "^8.0.1",
+    "ora": "^8.0.1",
+    "tsx": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
