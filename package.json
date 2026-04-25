@@ -1,12 +1,37 @@
 {
   "name": "airprompt",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Set up remote terminal access for AI agent workflows in minutes",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hatefrad/airprompt.git"
+  },
+  "homepage": "https://github.com/hatefrad/airprompt#readme",
+  "bugs": {
+    "url": "https://github.com/hatefrad/airprompt/issues"
+  },
+  "keywords": [
+    "ai-agent",
+    "cli",
+    "macos",
+    "ssh",
+    "tailscale",
+    "tmux"
+  ],
+  "files": [
+    "bin/",
+    "dist/src/",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "airprompt": "./bin/airprompt.js"
   },
   "scripts": {
+    "build": "tsc",
+    "prepack": "npm run build",
     "start": "tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -14,11 +39,11 @@
   "dependencies": {
     "chalk": "^5.3.0",
     "execa": "^8.0.1",
-    "ora": "^8.0.1",
-    "tsx": "^4.0.0"
+    "ora": "^8.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
     "typescript": "^5.0.0",
     "vitest": "^1.0.0"
   }

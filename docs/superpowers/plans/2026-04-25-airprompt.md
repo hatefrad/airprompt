@@ -1,8 +1,8 @@
-# agentreach Implementation Plan
+# airprompt Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a single `npx agentreach` CLI command that automates Tailscale + tmux + SSH setup so developers can SSH into their Mac from their phone while AI agents run tasks.
+**Goal:** Build a single `npx airprompt` CLI command that automates Tailscale + tmux + SSH setup so developers can SSH into their Mac from their phone while AI agents run tasks.
 
 **Architecture:** Sequential steps each implemented as a focused module in `src/steps/`. The entry point `src/index.ts` imports and runs them in order, stopping on first failure. UI helpers (chalk/ora) are centralized in `src/ui.ts`.
 
@@ -41,12 +41,12 @@
 
 ```json
 {
-  "name": "agentreach",
+  "name": "airprompt",
   "version": "1.0.0",
   "description": "Set up remote terminal access for AI agent workflows in minutes",
   "type": "module",
   "bin": {
-    "agentreach": "./src/index.ts"
+    "airprompt": "./src/index.ts"
   },
   "scripts": {
     "start": "tsx src/index.ts",
@@ -107,7 +107,7 @@ dist/
 - [ ] **Step 5: Install dependencies**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm install
 ```
 
@@ -116,7 +116,7 @@ Expected: `node_modules/` created, no errors.
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add package.json tsconfig.json vitest.config.ts .gitignore package-lock.json
 git commit -m "chore: project scaffold"
 ```
@@ -170,7 +170,7 @@ export function printInstructions(ip: string): void {
 - [ ] **Step 2: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add src/ui.ts
 git commit -m "feat: add ui helpers"
 ```
@@ -213,7 +213,7 @@ describe('checkPlatform', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/platform.test.ts
 ```
 
@@ -226,7 +226,7 @@ import { fail } from '../ui.js'
 
 export async function checkPlatform(): Promise<void> {
   if (process.platform !== 'darwin') {
-    fail('agentreach currently supports macOS only.')
+    fail('airprompt currently supports macOS only.')
     throw new Error('macOS only')
   }
 }
@@ -235,7 +235,7 @@ export async function checkPlatform(): Promise<void> {
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/platform.test.ts
 ```
 
@@ -244,7 +244,7 @@ Expected: PASS (2 tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add src/steps/platform.ts tests/steps/platform.test.ts
 git commit -m "feat: add platform check step"
 ```
@@ -326,7 +326,7 @@ describe('checkTmux', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/tmux.test.ts
 ```
 
@@ -351,7 +351,7 @@ export async function checkTmux(): Promise<void> {
   try {
     await execa('which', ['brew'])
   } catch {
-    fail('Homebrew not found. Install it from https://brew.sh then re-run agentreach.')
+    fail('Homebrew not found. Install it from https://brew.sh then re-run airprompt.')
     throw new Error('brew not found')
   }
 
@@ -369,7 +369,7 @@ export async function checkTmux(): Promise<void> {
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/tmux.test.ts
 ```
 
@@ -378,7 +378,7 @@ Expected: PASS (3 tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add src/steps/tmux.ts tests/steps/tmux.test.ts
 git commit -m "feat: add tmux check/install step"
 ```
@@ -449,7 +449,7 @@ describe('checkSSH', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/ssh.test.ts
 ```
 
@@ -485,7 +485,7 @@ export async function checkSSH(): Promise<void> {
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/ssh.test.ts
 ```
 
@@ -494,7 +494,7 @@ Expected: PASS (3 tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add src/steps/ssh.ts tests/steps/ssh.test.ts
 git commit -m "feat: add SSH check/enable step"
 ```
@@ -576,7 +576,7 @@ describe('checkTailscale', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/tailscale.test.ts
 ```
 
@@ -603,7 +603,7 @@ async function waitForTailscaleConnection(): Promise<void> {
   try {
     await execa('tailscale', ['ip', '-4'])
   } catch (err) {
-    fail('Tailscale not connected. Open the Tailscale app and sign in, then re-run agentreach.')
+    fail('Tailscale not connected. Open the Tailscale app and sign in, then re-run airprompt.')
     throw err
   }
 }
@@ -646,7 +646,7 @@ export async function checkTailscale(): Promise<void> {
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/tailscale.test.ts
 ```
 
@@ -655,7 +655,7 @@ Expected: PASS (3 tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add src/steps/tailscale.ts tests/steps/tailscale.test.ts
 git commit -m "feat: add tailscale check/install step"
 ```
@@ -711,7 +711,7 @@ describe('getTailscaleIP', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/ip.test.ts
 ```
 
@@ -739,7 +739,7 @@ export async function getTailscaleIP(): Promise<string> {
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test -- tests/steps/ip.test.ts
 ```
 
@@ -748,7 +748,7 @@ Expected: PASS (2 tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add src/steps/ip.ts tests/steps/ip.test.ts
 git commit -m "feat: add tailscale IP step"
 ```
@@ -777,7 +777,7 @@ const { version } = JSON.parse(
   await import('fs').then(fs => fs.promises.readFile(new URL('../package.json', import.meta.url), 'utf-8'))
 )
 
-console.log(chalk.bold(`\nagentreach v${version}\n`))
+console.log(chalk.bold(`\nairprompt v${version}\n`))
 
 try {
   await checkPlatform()
@@ -794,13 +794,13 @@ try {
 - [ ] **Step 2: Make it executable**
 
 ```bash
-chmod +x /Users/hatef/Sites/agentreach/src/index.ts
+chmod +x /Users/hatef/Sites/airprompt/src/index.ts
 ```
 
 - [ ] **Step 3: Test it runs**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm start
 ```
 
@@ -809,7 +809,7 @@ Expected: Runs all checks, prints your Tailscale IP and Termius instructions.
 - [ ] **Step 4: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add src/index.ts
 git commit -m "feat: add entry point, wire up all steps"
 ```
@@ -824,7 +824,7 @@ git commit -m "feat: add entry point, wire up all steps"
 - [ ] **Step 1: Create README.md**
 
 ```markdown
-# agentreach
+# airprompt
 
 Set up remote terminal access for AI agent workflows in minutes.
 
@@ -833,7 +833,7 @@ Run this on your Mac and you'll be able to SSH into your terminal from your phon
 ## Usage
 
 \`\`\`bash
-npx agentreach
+npx airprompt
 \`\`\`
 
 That's it. The CLI will:
@@ -875,7 +875,7 @@ When an AI agent is running a long task and needs confirmation, you shouldn't ha
 - [ ] **Step 2: Commit**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 git add README.md
 git commit -m "docs: add README"
 ```
@@ -887,7 +887,7 @@ git commit -m "docs: add README"
 - [ ] **Step 1: Run all tests**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm test
 ```
 
@@ -896,7 +896,7 @@ Expected: All tests pass (14 tests across 5 files).
 - [ ] **Step 2: Final smoke test**
 
 ```bash
-cd /Users/hatef/Sites/agentreach
+cd /Users/hatef/Sites/airprompt
 npm start
 ```
 

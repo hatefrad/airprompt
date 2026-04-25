@@ -15,8 +15,20 @@ That's it. The CLI will:
 1. Check you're on macOS
 2. Install and connect Tailscale (if needed)
 3. Install tmux (if needed)
-4. Enable SSH Remote Login (if needed)
+4. Enable macOS SSH Remote Login (if needed)
 5. Print your Tailscale IP and Termius setup instructions
+
+## What airprompt changes
+
+airprompt may install Tailscale and tmux with Homebrew, and it may run `sudo systemsetup -setremotelogin on` to enable macOS Remote Login.
+
+That SSH change lets devices on your Tailscale network connect to your Mac with your normal macOS username and password or SSH key. It does not open a public tunnel by itself, but you should only use it with a Tailscale account and devices you trust.
+
+To disable Remote Login later:
+
+```bash
+sudo systemsetup -setremotelogin off
+```
 
 ## What you need on your phone
 
@@ -40,6 +52,10 @@ tmux attach -t work
 
 - macOS
 - [Homebrew](https://brew.sh) (for auto-installing Tailscale and tmux)
+
+## Security model
+
+airprompt assumes SSH is reachable over your private Tailscale network, not the open internet. Keep your Tailscale account protected, remove old devices from your tailnet, and prefer SSH keys over passwords for regular use.
 
 ## Why
 

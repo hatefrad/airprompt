@@ -1,11 +1,11 @@
-# agentreach — Design Spec
+# airprompt — Design Spec
 
 **Date:** 2026-04-25  
 **Version:** v1 (macOS only)
 
 ## Overview
 
-A single-command CLI (`npx agentreach`) that automates the Tailscale + tmux + SSH setup so developers can access their terminal remotely from their phone while AI agents (Claude, etc.) are running tasks.
+A single-command CLI (`npx airprompt`) that automates the Tailscale + tmux + SSH setup so developers can access their terminal remotely from their phone while AI agents (Claude, etc.) are running tasks.
 
 ## Problem
 
@@ -13,7 +13,7 @@ When an AI agent runs a long task and needs user confirmation, the developer may
 
 ## Solution
 
-`npx agentreach` walks through all setup steps automatically, prints the Tailscale IP, and gives copy-paste Termius instructions so the developer can SSH in from their phone within minutes.
+`npx airprompt` walks through all setup steps automatically, prints the Tailscale IP, and gives copy-paste Termius instructions so the developer can SSH in from their phone within minutes.
 
 ## Architecture
 
@@ -36,7 +36,7 @@ Steps run sequentially. Each step prints a status line (✔ success / ✖ error)
 ### Output example
 
 ```
-agentreach v1.0.0
+airprompt v1.0.0
 
 ✔ macOS detected
 ✔ Tailscale installed and running
@@ -60,7 +60,8 @@ agentreach v1.0.0
 | Tool | Purpose |
 |------|---------|
 | TypeScript | Language |
-| `tsx` | Run TS directly (dev + npx) |
+| `tsx` | Run TS directly in development |
+| `tsc` | Compile the published CLI runtime |
 | `execa` | Shell command execution |
 | `chalk` | Colored terminal output |
 | `ora` | Spinners for long steps (brew installs) |
@@ -68,7 +69,7 @@ agentreach v1.0.0
 ## File Structure
 
 ```
-agentreach/
+airprompt/
 ├── src/
 │   ├── index.ts          # Entry point, orchestrates steps
 │   ├── steps/
@@ -93,5 +94,5 @@ agentreach/
 
 - Linux support
 - ntfy / push notification hooks
-- `agentreach status` / `agentreach session` subcommands
+- `airprompt status` / `airprompt session` subcommands
 - Windows
