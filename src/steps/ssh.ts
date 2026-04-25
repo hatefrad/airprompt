@@ -2,7 +2,13 @@ import { execa } from 'execa'
 import { success, info, fail, spinner } from '../ui.js'
 
 export async function checkSSH(): Promise<void> {
-  const { stdout } = await execa('sudo', ['systemsetup', '-getremotelogin'])
+  let stdout: string
+  try {
+    ;({ stdout } = await execa('sudo', ['systemsetup', '-getremotelogin']))
+  } catch (err) {
+    fail('Could not check SSH status. Run: sudo systemsetup -getremotelogin')
+    throw err
+  }
 
   if (stdout.includes('On')) {
     success('SSH (Remote Login) enabled')

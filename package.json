@@ -4,7 +4,7 @@
   "description": "Set up remote terminal access for AI agent workflows in minutes",
   "type": "module",
   "bin": {
-    "agentreach": "./src/index.ts"
+    "agentreach": "./bin/agentreach.js"
   },
   "scripts": {
     "start": "tsx src/index.ts",
