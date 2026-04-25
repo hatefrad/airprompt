@@ -1,6 +1,6 @@
 {
   "name": "airprompt",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Set up remote terminal access for AI agent workflows in minutes",
   "type": "module",
   "license": "MIT",
@@ -21,6 +21,7 @@
     "tmux"
   ],
   "files": [
+    "assets/",
     "bin/",
     "dist/src/",
     "README.md",
