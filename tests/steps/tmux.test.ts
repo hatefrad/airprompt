@@ -44,7 +44,7 @@ describe('checkTmux', () => {
 
     const { checkTmux } = await import('../../src/steps/tmux.js')
     await expect(checkTmux()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('brew', ['install', 'tmux'])
+    expect(execa).toHaveBeenCalledWith('brew', ['install', 'tmux'], { stdio: 'inherit' })
   })
 
   it('does not install tmux when missing in dry-run mode', async () => {

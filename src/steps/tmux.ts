@@ -1,6 +1,6 @@
 import { execa } from 'execa'
 import type { AirpromptOptions } from '../options.js'
-import { success, info, fail, spinner } from '../ui.js'
+import { success, info, fail } from '../ui.js'
 
 export async function checkTmux(options: AirpromptOptions = { dryRun: false }): Promise<void> {
   try {
@@ -24,12 +24,12 @@ export async function checkTmux(options: AirpromptOptions = { dryRun: false }): 
     throw new Error('brew not found')
   }
 
-  const spin = spinner('Installing tmux...')
+  info('Installing tmux (this may take a moment)...')
   try {
-    await execa('brew', ['install', 'tmux'])
-    spin.succeed('tmux installed')
+    await execa('brew', ['install', 'tmux'], { stdio: 'inherit' })
+    success('tmux installed')
   } catch (err) {
-    spin.fail('Failed to install tmux')
+    fail('Failed to install tmux')
     throw err
   }
 }
