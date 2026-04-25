@@ -1,6 +1,6 @@
 import { execa } from 'execa'
 import type { AirpromptOptions } from '../options.js'
-import { success, info, fail, spinner } from '../ui.js'
+import { success, info, fail } from '../ui.js'
 
 export async function checkSSH(options: AirpromptOptions = { dryRun: false }): Promise<void> {
   let stdout: string
@@ -22,6 +22,7 @@ export async function checkSSH(options: AirpromptOptions = { dryRun: false }): P
   }
 
   info('SSH is off — enabling Remote Login...')
+  const { spinner } = await import('../ui.js')
   const spin = spinner('Enabling SSH...')
   try {
     await execa('sudo', ['systemsetup', '-setremotelogin', 'on'])

@@ -10,13 +10,8 @@ describe('checkSSH', () => {
     vi.resetModules()
     vi.clearAllMocks()
 
-    // Set up spinner mock
-    mockSpinner = {
-      succeed: vi.fn(),
-      fail: vi.fn(),
-    }
+    mockSpinner = { succeed: vi.fn(), fail: vi.fn() }
 
-    // Mock UI module
     const uiModule = await import('../../src/ui.js')
     vi.mocked(uiModule.spinner).mockReturnValue(mockSpinner)
   })
@@ -28,6 +23,7 @@ describe('checkSSH', () => {
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
     expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-getremotelogin'])
+    expect(execa).toHaveBeenCalledTimes(1)
   })
 
   it('enables SSH when remote login is off', async () => {
@@ -54,10 +50,18 @@ describe('checkSSH', () => {
   it('rejects when enabling SSH fails', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any)
-      .mockRejectedValueOnce(new Error('permission denied'))
+      .mockResolvedValueOnce({ stdout: 'Remote Login: Off' } as any) // getremotelogin
+      .mockRejectedValueOnce(new Error('permission denied'))           // setremotelogin on
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).rejects.toThrow('permission denied')
+  })
+
+  it('rejects when SSH status check fails', async () => {
+    const { execa } = await import('execa')
+    vi.mocked(execa).mockRejectedValueOnce(new Error('sudo failed'))
+
+    const { checkSSH } = await import('../../src/steps/ssh.js')
+    await expect(checkSSH()).rejects.toThrow('sudo failed')
   })
 })
