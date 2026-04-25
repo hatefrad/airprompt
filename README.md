@@ -80,7 +80,7 @@ If `ssh-copy-id` is not installed, append the public key from `~/.ssh/id_ed25519
 
 ## Status checks
 
-`npx airprompt status` checks whether Tailscale is installed and connected, tmux is installed, and macOS Remote Login is enabled. The Remote Login check may ask for administrator permission because macOS requires it for `systemsetup`.
+`npx airprompt status` checks whether Tailscale is installed and connected, tmux is installed, and macOS Remote Login is reachable. Status checks are read-only and do not require sudo.
 
 ## Security model
 

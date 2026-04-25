@@ -18,13 +18,14 @@ describe('runStatus', () => {
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockResolvedValueOnce({ stdout: '100.64.0.1' } as any)               // tailscale ip -4
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)      // which tmux
-      .mockResolvedValueOnce({ stdout: '1234' } as any)                     // pgrep sshd
+      .mockResolvedValueOnce({} as any)                                     // nc localhost 22
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
 
     const { success } = await import('../../src/ui.js')
     expect(code).toBe(0)
+    expect(execa).toHaveBeenCalledWith('nc', ['-z', '-w1', 'localhost', '22'])
     expect(vi.mocked(success)).toHaveBeenCalledTimes(3)
   })
 
@@ -33,7 +34,7 @@ describe('runStatus', () => {
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('not found'))                        // which tailscale
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)     // which tmux
-      .mockResolvedValueOnce({ stdout: '1234' } as any)                    // pgrep sshd
+      .mockResolvedValueOnce({} as any)                                    // nc localhost 22
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
@@ -49,7 +50,7 @@ describe('runStatus', () => {
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockRejectedValueOnce(new Error('no IP'))                            // tailscale ip -4
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)     // which tmux
-      .mockResolvedValueOnce({ stdout: '1234' } as any)                    // pgrep sshd
+      .mockResolvedValueOnce({} as any)                                    // nc localhost 22
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
@@ -65,7 +66,7 @@ describe('runStatus', () => {
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockResolvedValueOnce({ stdout: '100.64.0.1' } as any)               // tailscale ip -4
       .mockRejectedValueOnce(new Error('not found'))                        // which tmux
-      .mockResolvedValueOnce({ stdout: '1234' } as any)                    // pgrep sshd
+      .mockResolvedValueOnce({} as any)                                    // nc localhost 22
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()
@@ -81,7 +82,7 @@ describe('runStatus', () => {
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tailscale' } as any) // which tailscale
       .mockResolvedValueOnce({ stdout: '100.64.0.1' } as any)               // tailscale ip -4
       .mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)      // which tmux
-      .mockRejectedValueOnce(new Error('no process'))                       // pgrep sshd
+      .mockRejectedValueOnce(new Error('connection refused'))               // nc localhost 22
 
     const { runStatus } = await import('../../src/commands/status.js')
     const code = await runStatus()

@@ -28,9 +28,9 @@ export async function runStatus(): Promise<number> {
     exitCode = 1
   }
 
-  // SSH Remote Login — check via pgrep (no sudo required)
+  // SSH Remote Login — check whether the socket accepts connections.
   try {
-    await execa('pgrep', ['-x', 'sshd'])
+    await execa('nc', ['-z', '-w1', 'localhost', '22'])
     success('SSH Remote Login enabled')
   } catch {
     fail('SSH Remote Login disabled')
