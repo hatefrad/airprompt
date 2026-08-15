@@ -1,6 +1,6 @@
 # airprompt
 
-![airprompt setup preview](assets/airprompt.png)
+![airprompt setup preview](https://raw.githubusercontent.com/hatefrad/airprompt/main/assets/airprompt.png)
 
 Set up remote terminal access for AI agent workflows in minutes.
 

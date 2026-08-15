@@ -2,8 +2,16 @@ import { execa } from 'execa'
 import { createInterface } from 'readline'
 import type { AirpromptOptions } from '../options.js'
 import { success, info, warn, fail } from '../ui.js'
+import { getConnectedTailscale } from './tailscale-status.js'
 
 async function prompt(question: string): Promise<string> {
+  if (process.stdin.isTTY === false) {
+    fail(
+      'Tailscale needs your input. Open the app and sign in, then re-run airprompt in an interactive terminal.',
+    )
+    throw new Error('interactive terminal required')
+  }
+
   const rl = createInterface({ input: process.stdin, output: process.stdout })
   return new Promise((resolve) => {
     rl.question(question, (answer) => {
@@ -15,14 +23,18 @@ async function prompt(question: string): Promise<string> {
 
 async function waitForTailscaleConnection(): Promise<void> {
   try {
-    await execa('tailscale', ['ip', '-4'])
+    await getConnectedTailscale()
   } catch (err) {
-    fail('Tailscale not connected. Open the Tailscale app and sign in, then re-run airprompt.')
+    fail(
+      'Tailscale not connected. Open the Tailscale app and sign in, then re-run airprompt.',
+    )
     throw err
   }
 }
 
-export async function checkTailscale(options: AirpromptOptions = { dryRun: false }): Promise<void> {
+export async function checkTailscale(
+  options: AirpromptOptions = { dryRun: false },
+): Promise<void> {
   // Check if installed
   try {
     await execa('which', ['tailscale'])
@@ -33,12 +45,18 @@ export async function checkTailscale(options: AirpromptOptions = { dryRun: false
       return
     }
 
-    info('Tailscale not found — installing via Homebrew (this may take a few minutes)...')
+    info(
+      'Tailscale not found — installing via Homebrew (this may take a few minutes)...',
+    )
     try {
-      await execa('brew', ['install', '--cask', 'tailscale'], { stdio: 'inherit' })
+      await execa('brew', ['install', '--cask', 'tailscale'], {
+        stdio: 'inherit',
+      })
       success('Tailscale installed')
     } catch (err) {
-      fail('Failed to install Tailscale. Install manually: https://tailscale.com/download')
+      fail(
+        'Failed to install Tailscale. Install manually: https://tailscale.com/download',
+      )
       throw err
     }
     warn('Open the Tailscale app from your Applications folder and sign in.')
@@ -50,7 +68,7 @@ export async function checkTailscale(options: AirpromptOptions = { dryRun: false
 
   // Already installed — check if connected
   try {
-    await execa('tailscale', ['ip', '-4'])
+    await getConnectedTailscale()
     success('Tailscale installed and running')
   } catch {
     if (options.dryRun) {
@@ -58,7 +76,9 @@ export async function checkTailscale(options: AirpromptOptions = { dryRun: false
       return
     }
 
-    warn('Tailscale is installed but not connected. Open the Tailscale app and sign in.')
+    warn(
+      'Tailscale is installed but not connected. Open the Tailscale app and sign in.',
+    )
     await prompt('Press Enter once Tailscale is connected...')
     await waitForTailscaleConnection()
     success('Tailscale running')

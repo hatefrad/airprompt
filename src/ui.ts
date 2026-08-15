@@ -26,12 +26,17 @@ export function printInstructions(ip: string): void {
   const line = '━'.repeat(40)
   const user = userInfo().username
   console.log('\n' + line)
-  console.log(chalk.bold('  You\'re all set!\n'))
-  console.log('  1. Start a tmux session ' + chalk.dim('(run this on your Mac first):'))
+  console.log(chalk.bold("  You're all set!\n"))
+  console.log(
+    '  1. Start a tmux session ' + chalk.dim('(run this on your Mac first):'),
+  )
   console.log('     ' + chalk.cyan('tmux new -s work'))
   console.log()
   console.log('  2. Install on your phone:')
-  console.log('     • Tailscale ' + chalk.dim('(sign in with the same account as this Mac)'))
+  console.log(
+    '     • Tailscale ' +
+      chalk.dim('(sign in with the same account as this Mac)'),
+  )
   console.log('     • Termius ' + chalk.dim('(SSH client)'))
   console.log()
   console.log('  3. Add host in Termius:')
@@ -48,7 +53,8 @@ export function printCleanup(): void {
 }
 
 export function printHelp(): void {
-  console.log(`
+  console.log(
+    `
 Usage: airprompt [command] [options]
 
 Commands:
@@ -56,6 +62,8 @@ Commands:
 
 Options:
   --dry-run    Preview changes without installing or enabling anything
+  --version    Show the installed version
   --help       Show this help message
-  `.trim() + '\n')
+  `.trim() + '\n',
+  )
 }

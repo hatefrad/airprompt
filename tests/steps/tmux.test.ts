@@ -28,7 +28,9 @@ describe('checkTmux', () => {
 
   it('resolves when tmux is already installed', async () => {
     const { execa } = await import('execa')
-    vi.mocked(execa).mockResolvedValueOnce({ stdout: '/usr/local/bin/tmux' } as any)
+    vi.mocked(execa).mockResolvedValueOnce({
+      stdout: '/usr/local/bin/tmux',
+    } as any)
 
     const { checkTmux } = await import('../../src/steps/tmux.js')
     await expect(checkTmux()).resolves.toBeUndefined()
@@ -39,12 +41,14 @@ describe('checkTmux', () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('not found')) // which tmux fails
-      .mockResolvedValueOnce({} as any)              // which brew succeeds
-      .mockResolvedValueOnce({} as any)              // brew install succeeds
+      .mockResolvedValueOnce({} as any) // which brew succeeds
+      .mockResolvedValueOnce({} as any) // brew install succeeds
 
     const { checkTmux } = await import('../../src/steps/tmux.js')
     await expect(checkTmux()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('brew', ['install', 'tmux'], { stdio: 'inherit' })
+    expect(execa).toHaveBeenCalledWith('brew', ['install', 'tmux'], {
+      stdio: 'inherit',
+    })
   })
 
   it('does not install tmux when missing in dry-run mode', async () => {
@@ -60,8 +64,8 @@ describe('checkTmux', () => {
   it('rejects when brew itself is not installed', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockRejectedValueOnce(new Error('not found'))  // which tmux
-      .mockRejectedValueOnce(new Error('not found'))  // which brew
+      .mockRejectedValueOnce(new Error('not found')) // which tmux
+      .mockRejectedValueOnce(new Error('not found')) // which brew
 
     const { checkTmux } = await import('../../src/steps/tmux.js')
     await expect(checkTmux()).rejects.toThrow('brew not found')
@@ -70,9 +74,9 @@ describe('checkTmux', () => {
   it('rejects when brew install fails', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
-      .mockRejectedValueOnce(new Error('not found'))         // which tmux
-      .mockResolvedValueOnce({} as any)                      // which brew succeeds
-      .mockRejectedValueOnce(new Error('brew unavailable'))  // brew install
+      .mockRejectedValueOnce(new Error('not found')) // which tmux
+      .mockResolvedValueOnce({} as any) // which brew succeeds
+      .mockRejectedValueOnce(new Error('brew unavailable')) // brew install
 
     const { checkTmux } = await import('../../src/steps/tmux.js')
     await expect(checkTmux()).rejects.toThrow('brew unavailable')

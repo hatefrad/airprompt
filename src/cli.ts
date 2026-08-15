@@ -6,10 +6,24 @@ import { checkSSH } from './steps/ssh.js'
 import { getTailscaleIP } from './steps/ip.js'
 import { parseOptions } from './options.js'
 import { runStatus } from './commands/status.js'
-import { info, warn, printHelp, printInstructions, printCleanup } from './ui.js'
+import {
+  fail,
+  info,
+  warn,
+  printHelp,
+  printInstructions,
+  printCleanup,
+} from './ui.js'
 
-export async function runAirprompt(args: string[], version: string): Promise<number> {
+export async function runAirprompt(
+  args: string[],
+  version: string,
+): Promise<number> {
   console.log(chalk.bold(`\nairprompt v${version}\n`))
+
+  if (args.length === 1 && (args[0] === '--version' || args[0] === '-v')) {
+    return 0
+  }
 
   if (args[0] === 'help' || args.includes('--help')) {
     printHelp()
@@ -35,7 +49,9 @@ export async function runAirprompt(args: string[], version: string): Promise<num
     }
 
     if (options.dryRun) {
-      info('Dry run mode: airprompt will check your system but will not install or enable anything.')
+      info(
+        'Dry run mode: airprompt will check your system but will not install or enable anything.',
+      )
     }
 
     await checkPlatform()
@@ -48,7 +64,9 @@ export async function runAirprompt(args: string[], version: string): Promise<num
       try {
         await getTailscaleIP()
       } catch {
-        info('(Tailscale not connected — connect to see your IP and final instructions)')
+        info(
+          '(Tailscale not connected — connect to see your IP and final instructions)',
+        )
       }
       return 0
     }
@@ -57,7 +75,10 @@ export async function runAirprompt(args: string[], version: string): Promise<num
     printInstructions(ip)
     printCleanup()
     return 0
-  } catch {
+  } catch (error) {
+    const detail =
+      error instanceof Error && error.message ? `: ${error.message}` : ''
+    fail(`airprompt stopped${detail}`)
     return 1
   }
 }

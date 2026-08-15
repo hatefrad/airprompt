@@ -25,6 +25,7 @@ vi.mock('../src/commands/status.js', () => ({
 }))
 
 vi.mock('../src/ui.js', () => ({
+  fail: vi.fn(),
   info: vi.fn(),
   warn: vi.fn(),
   printHelp: vi.fn(),
@@ -94,5 +95,28 @@ describe('runAirprompt', () => {
 
     await expect(runAirprompt(['help'], '0.1.0')).resolves.toBe(0)
     expect(printHelp).toHaveBeenCalled()
+  })
+
+  it('exits 0 for --version without running setup', async () => {
+    const { checkPlatform } = await import('../src/steps/platform.js')
+    const { runAirprompt } = await import('../src/cli.js')
+
+    await expect(runAirprompt(['--version'], '0.1.0')).resolves.toBe(0)
+    expect(checkPlatform).not.toHaveBeenCalled()
+  })
+
+  it('prints unexpected setup errors before exiting', async () => {
+    const { checkPlatform } = await import('../src/steps/platform.js')
+    const { fail } = await import('../src/ui.js')
+    vi.mocked(checkPlatform).mockRejectedValueOnce(
+      new Error('platform check failed'),
+    )
+
+    const { runAirprompt } = await import('../src/cli.js')
+
+    await expect(runAirprompt([], '0.1.0')).resolves.toBe(1)
+    expect(fail).toHaveBeenCalledWith(
+      'airprompt stopped: platform check failed',
+    )
   })
 })

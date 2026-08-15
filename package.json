@@ -4,6 +4,9 @@
   "description": "Set up remote terminal access for AI agent workflows in minutes",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hatefrad/airprompt.git"
@@ -21,7 +24,6 @@
     "tmux"
   ],
   "files": [
-    "assets/",
     "bin/",
     "dist/package.json",
     "dist/src/",
@@ -36,7 +38,12 @@
     "prepack": "npm run build",
     "start": "tsx src/index.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:package": "node scripts/test-package.mjs",
+    "lint": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -44,9 +51,11 @@
     "ora": "^8.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "tsx": "^4.0.0",
+    "@types/node": "^24.13.3",
+    "@vitest/coverage-v8": "^4.1.10",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.12",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^4.1.10"
   }
 }

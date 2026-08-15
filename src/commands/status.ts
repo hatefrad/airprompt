@@ -1,15 +1,19 @@
 import { execa } from 'execa'
 import { success, fail } from '../ui.js'
+import { getConnectedTailscale } from '../steps/tailscale-status.js'
 
 export async function runStatus(): Promise<number> {
   let exitCode = 0
+  let tailscaleIP: string | undefined
 
   // Tailscale
   try {
     await execa('which', ['tailscale'])
     try {
-      const { stdout } = await execa('tailscale', ['ip', '-4'])
-      success(`Tailscale connected (${stdout.trim()})`)
+      const tailscale = await getConnectedTailscale()
+      tailscaleIP = tailscale.ipv4
+      const name = tailscale.dnsName ? `, ${tailscale.dnsName}` : ''
+      success(`Tailscale connected (${tailscale.ipv4}${name})`)
     } catch {
       fail('Tailscale installed but not connected')
       exitCode = 1
@@ -28,12 +32,17 @@ export async function runStatus(): Promise<number> {
     exitCode = 1
   }
 
-  // SSH Remote Login — check whether the socket accepts connections.
+  // Verify the route users will actually connect through.
   try {
-    await execa('nc', ['-z', '-w1', 'localhost', '22'])
-    success('SSH Remote Login enabled')
+    if (!tailscaleIP) throw new Error('Tailscale unavailable')
+    await execa('nc', ['-z', '-w1', tailscaleIP, '22'])
+    success('SSH reachable over Tailscale')
   } catch {
-    fail('SSH Remote Login disabled')
+    fail(
+      tailscaleIP
+        ? 'SSH not reachable over Tailscale'
+        : 'SSH check skipped (Tailscale unavailable)',
+    )
     exitCode = 1
   }
 

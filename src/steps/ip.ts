@@ -1,10 +1,9 @@
-import { execa } from 'execa'
 import { success, fail } from '../ui.js'
+import { getConnectedTailscale } from './tailscale-status.js'
 
 export async function getTailscaleIP(): Promise<string> {
   try {
-    const { stdout } = await execa('tailscale', ['ip', '-4'])
-    const ip = stdout.trim()
+    const { ipv4: ip } = await getConnectedTailscale()
     success(`Tailscale IP: ${ip}`)
     return ip
   } catch (err) {

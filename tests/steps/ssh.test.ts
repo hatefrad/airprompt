@@ -16,6 +16,10 @@ vi.mock('../../src/ui.js', () => ({
   fail: vi.fn(),
 }))
 
+vi.mock('../../src/steps/tailscale-status.js', () => ({
+  getConnectedTailscale: vi.fn(async () => ({ ipv4: '100.64.0.1' })),
+}))
+
 describe('checkSSH', () => {
   beforeEach(async () => {
     vi.resetModules()
@@ -28,7 +32,7 @@ describe('checkSSH', () => {
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('nc', ['-z', '-w1', 'localhost', '22'])
+    expect(execa).toHaveBeenCalledWith('nc', ['-z', '-w1', '100.64.0.1', '22'])
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
@@ -36,11 +40,16 @@ describe('checkSSH', () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('connection refused')) // nc check — SSH off
-      .mockResolvedValueOnce({} as any)                       // setremotelogin on
+      .mockResolvedValueOnce({} as any) // setremotelogin on
+      .mockResolvedValueOnce({} as any) // nc check after enabling
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
+    expect(execa).toHaveBeenCalledWith(
+      'sudo',
+      ['systemsetup', '-setremotelogin', 'on'],
+      { stdio: 'inherit' },
+    )
   })
 
   it('does not enable SSH in dry-run mode', async () => {
@@ -49,7 +58,11 @@ describe('checkSSH', () => {
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH({ dryRun: true })).resolves.toBeUndefined()
-    expect(execa).not.toHaveBeenCalledWith('sudo', ['systemsetup', '-setremotelogin', 'on'], { stdio: 'inherit' })
+    expect(execa).not.toHaveBeenCalledWith(
+      'sudo',
+      ['systemsetup', '-setremotelogin', 'on'],
+      { stdio: 'inherit' },
+    )
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
@@ -57,24 +70,42 @@ describe('checkSSH', () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('connection refused')) // nc — SSH off
-      .mockRejectedValueOnce(new Error('Full Disk Access'))   // setremotelogin fails
-      .mockResolvedValueOnce({} as any)                       // open System Settings
-      .mockResolvedValueOnce({} as any)                       // nc — SSH now on
+      .mockRejectedValueOnce(new Error('Full Disk Access')) // setremotelogin fails
+      .mockResolvedValueOnce({} as any) // open System Settings
+      .mockResolvedValueOnce({} as any) // nc — SSH now on
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).resolves.toBeUndefined()
-    expect(execa).toHaveBeenCalledWith('open', ['x-apple.systempreferences:com.apple.preferences.sharing'])
+    expect(execa).toHaveBeenCalledWith('open', [
+      'x-apple.systempreferences:com.apple.preferences.sharing',
+    ])
   })
 
   it('rejects when user does not enable SSH in System Settings', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('connection refused')) // nc — SSH off
-      .mockRejectedValueOnce(new Error('Full Disk Access'))   // setremotelogin fails
-      .mockResolvedValueOnce({} as any)                       // open System Settings
+      .mockRejectedValueOnce(new Error('Full Disk Access')) // setremotelogin fails
+      .mockResolvedValueOnce({} as any) // open System Settings
       .mockRejectedValueOnce(new Error('connection refused')) // nc — still off
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).rejects.toThrow('SSH not enabled')
+  })
+
+  it('does not wait for manual setup outside an interactive terminal', async () => {
+    Object.defineProperty(process.stdin, 'isTTY', {
+      value: false,
+      configurable: true,
+    })
+    const { execa } = await import('execa')
+    vi.mocked(execa)
+      .mockRejectedValueOnce(new Error('connection refused'))
+      .mockRejectedValueOnce(new Error('Full Disk Access'))
+      .mockResolvedValueOnce({} as never)
+
+    const { checkSSH } = await import('../../src/steps/ssh.js')
+    await expect(checkSSH()).rejects.toThrow('interactive terminal required')
+    delete (process.stdin as { isTTY?: boolean }).isTTY
   })
 })
