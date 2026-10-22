@@ -22,8 +22,8 @@ async function prompt(question: string): Promise<void> {
 }
 
 async function isSSHOn(): Promise<boolean> {
+  const { ipv4 } = await getConnectedTailscale()
   try {
-    const { ipv4 } = await getConnectedTailscale()
     await execa('nc', ['-z', '-w1', ipv4, '22'])
     return true
   } catch {
@@ -38,7 +38,15 @@ export async function checkSSH(
   try {
     on = await isSSHOn()
   } catch (err) {
-    fail('Could not check SSH status.')
+    if (options.dryRun) {
+      warn(
+        '[dry-run] SSH check skipped: connect Tailscale to check Remote Login.',
+      )
+      return
+    }
+    fail(
+      'Could not check SSH: make sure Tailscale is connected, then re-run airprompt.',
+    )
     throw err
   }
 
@@ -54,18 +62,26 @@ export async function checkSSH(
     return
   }
 
-  info('SSH is off — enabling Remote Login...')
+  info('SSH is not reachable over Tailscale — trying to enable Remote Login...')
+  let enabled = false
   try {
     await execa('sudo', ['systemsetup', '-setremotelogin', 'on'], {
       stdio: 'inherit',
     })
-    const reachable = await isSSHOn()
-    if (!reachable)
-      throw new Error('SSH enabled but not reachable over Tailscale')
-    success('SSH enabled and reachable over Tailscale')
-    return
+    enabled = true
   } catch {
     // systemsetup may fail on macOS Ventura+ due to Full Disk Access restrictions — fall through
+  }
+
+  if (enabled) {
+    if (!(await isSSHOn())) {
+      fail(
+        'Remote Login was enabled, but SSH is not reachable over Tailscale. Check Tailscale connectivity and firewall settings.',
+      )
+      throw new Error('SSH not reachable over Tailscale')
+    }
+    success('SSH enabled and reachable over Tailscale')
+    return
   }
 
   // Fall back: open System Settings and let the user enable it manually
@@ -82,9 +98,9 @@ export async function checkSSH(
   const nowOn = await isSSHOn()
   if (!nowOn) {
     fail(
-      'Remote Login still off. Enable it in System Settings → Sharing → Remote Login.',
+      'SSH is still not reachable over Tailscale. Check Remote Login in System Settings → Sharing, Tailscale connectivity, and firewall settings.',
     )
-    throw new Error('SSH not enabled')
+    throw new Error('SSH not reachable over Tailscale')
   }
-  success('SSH enabled')
+  success('SSH reachable over Tailscale')
 }

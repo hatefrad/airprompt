@@ -23,7 +23,10 @@ vi.mock('../../src/steps/tailscale-status.js', () => ({
 describe('checkSSH', () => {
   beforeEach(async () => {
     vi.resetModules()
-    vi.clearAllMocks()
+    vi.resetAllMocks()
+    const { getConnectedTailscale } =
+      await import('../../src/steps/tailscale-status.js')
+    vi.mocked(getConnectedTailscale).mockResolvedValue({ ipv4: '100.64.0.1' })
   })
 
   it('resolves when SSH is already listening on port 22', async () => {
@@ -66,6 +69,49 @@ describe('checkSSH', () => {
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
+  it('stops without enabling Remote Login when Tailscale is unavailable', async () => {
+    const { getConnectedTailscale } =
+      await import('../../src/steps/tailscale-status.js')
+    vi.mocked(getConnectedTailscale).mockRejectedValueOnce(
+      new Error('Tailscale is NeedsLogin'),
+    )
+    const { checkSSH } = await import('../../src/steps/ssh.js')
+    await expect(checkSSH()).rejects.toThrow('Tailscale is NeedsLogin')
+    const { execa } = await import('execa')
+    expect(execa).not.toHaveBeenCalled()
+  })
+
+  it('skips SSH in dry-run mode when Tailscale is unavailable', async () => {
+    const { getConnectedTailscale } =
+      await import('../../src/steps/tailscale-status.js')
+    vi.mocked(getConnectedTailscale).mockRejectedValueOnce(
+      new Error('Tailscale is NeedsLogin'),
+    )
+    const { checkSSH } = await import('../../src/steps/ssh.js')
+    await expect(checkSSH({ dryRun: true })).resolves.toBeUndefined()
+    const { execa } = await import('execa')
+    const { warn } = await import('../../src/ui.js')
+    expect(execa).not.toHaveBeenCalled()
+    expect(warn).toHaveBeenCalledWith(
+      '[dry-run] SSH check skipped: connect Tailscale to check Remote Login.',
+    )
+  })
+
+  it('reports a failed connection after enabling Remote Login without opening Settings', async () => {
+    const { execa } = await import('execa')
+    vi.mocked(execa)
+      .mockRejectedValueOnce(new Error('connection refused'))
+      .mockResolvedValueOnce({} as never)
+      .mockRejectedValueOnce(new Error('connection timed out'))
+    const { checkSSH } = await import('../../src/steps/ssh.js')
+    await expect(checkSSH()).rejects.toThrow('SSH not reachable over Tailscale')
+    expect(execa).toHaveBeenCalledTimes(3)
+    const { fail } = await import('../../src/ui.js')
+    expect(fail).toHaveBeenCalledWith(
+      'Remote Login was enabled, but SSH is not reachable over Tailscale. Check Tailscale connectivity and firewall settings.',
+    )
+  })
+
   it('falls back to System Settings when enable fails and succeeds if user enables it', async () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
@@ -90,7 +136,7 @@ describe('checkSSH', () => {
       .mockRejectedValueOnce(new Error('connection refused')) // nc — still off
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
-    await expect(checkSSH()).rejects.toThrow('SSH not enabled')
+    await expect(checkSSH()).rejects.toThrow('SSH not reachable over Tailscale')
   })
 
   it('does not wait for manual setup outside an interactive terminal', async () => {
