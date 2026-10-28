@@ -24,6 +24,10 @@ describe('checkSSH', () => {
   beforeEach(async () => {
     vi.resetModules()
     vi.resetAllMocks()
+    Object.defineProperty(process.stdin, 'isTTY', {
+      value: true,
+      configurable: true,
+    })
     const { getConnectedTailscale } =
       await import('../../src/steps/tailscale-status.js')
     vi.mocked(getConnectedTailscale).mockResolvedValue({ ipv4: '100.64.0.1' })
@@ -140,10 +144,8 @@ describe('checkSSH', () => {
   })
 
   it('does not wait for manual setup outside an interactive terminal', async () => {
-    Object.defineProperty(process.stdin, 'isTTY', {
-      value: false,
-      configurable: true,
-    })
+    // Node leaves isTTY undefined (not false) when stdin is not a terminal
+    delete (process.stdin as { isTTY?: boolean }).isTTY
     const { execa } = await import('execa')
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('connection refused'))
@@ -152,6 +154,5 @@ describe('checkSSH', () => {
 
     const { checkSSH } = await import('../../src/steps/ssh.js')
     await expect(checkSSH()).rejects.toThrow('interactive terminal required')
-    delete (process.stdin as { isTTY?: boolean }).isTTY
   })
 })

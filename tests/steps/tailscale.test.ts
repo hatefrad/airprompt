@@ -29,6 +29,10 @@ describe('checkTailscale', () => {
   beforeEach(async () => {
     vi.resetModules()
     vi.clearAllMocks()
+    Object.defineProperty(process.stdin, 'isTTY', {
+      value: true,
+      configurable: true,
+    })
 
     mockSpinner = { succeed: vi.fn(), fail: vi.fn() }
 
@@ -96,10 +100,8 @@ describe('checkTailscale', () => {
   })
 
   it('does not wait for input outside an interactive terminal', async () => {
-    Object.defineProperty(process.stdin, 'isTTY', {
-      value: false,
-      configurable: true,
-    })
+    // Node leaves isTTY undefined (not false) when stdin is not a terminal
+    delete (process.stdin as { isTTY?: boolean }).isTTY
     const { execa } = await import('execa')
     const { getConnectedTailscale } =
       await import('../../src/steps/tailscale-status.js')
@@ -114,6 +116,5 @@ describe('checkTailscale', () => {
     await expect(checkTailscale()).rejects.toThrow(
       'interactive terminal required',
     )
-    delete (process.stdin as { isTTY?: boolean }).isTTY
   })
 })

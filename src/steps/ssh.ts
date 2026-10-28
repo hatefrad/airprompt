@@ -5,7 +5,7 @@ import { success, info, warn, fail } from '../ui.js'
 import { getConnectedTailscale } from './tailscale-status.js'
 
 async function prompt(question: string): Promise<void> {
-  if (process.stdin.isTTY === false) {
+  if (!process.stdin.isTTY) {
     fail(
       'Remote Login needs manual setup. Enable it in System Settings → General → Sharing, then re-run airprompt.',
     )

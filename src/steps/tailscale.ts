@@ -5,7 +5,7 @@ import { success, info, warn, fail } from '../ui.js'
 import { getConnectedTailscale } from './tailscale-status.js'
 
 async function prompt(question: string): Promise<string> {
-  if (process.stdin.isTTY === false) {
+  if (!process.stdin.isTTY) {
     fail(
       'Tailscale needs your input. Open the app and sign in, then re-run airprompt in an interactive terminal.',
     )
