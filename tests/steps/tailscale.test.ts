@@ -59,6 +59,7 @@ describe('checkTailscale', () => {
     const { execa } = await import('execa')
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('not found')) // which tailscale
+      .mockResolvedValueOnce({} as any) // which brew
       .mockResolvedValueOnce({} as any) // brew install --cask tailscale
 
     const { checkTailscale } = await import('../../src/steps/tailscale.js')
@@ -84,6 +85,17 @@ describe('checkTailscale', () => {
     expect(execa).toHaveBeenCalledTimes(1)
   })
 
+  it('rejects when brew itself is not installed', async () => {
+    const { execa } = await import('execa')
+    vi.mocked(execa)
+      .mockRejectedValueOnce(new Error('not found')) // which tailscale
+      .mockRejectedValueOnce(new Error('not found')) // which brew
+
+    const { checkTailscale } = await import('../../src/steps/tailscale.js')
+    await expect(checkTailscale()).rejects.toThrow('brew not found')
+    expect(execa).toHaveBeenCalledTimes(2)
+  })
+
   it('rejects when not connected after install (no IP)', async () => {
     const { execa } = await import('execa')
     const { getConnectedTailscale } =
@@ -93,6 +105,7 @@ describe('checkTailscale', () => {
     )
     vi.mocked(execa)
       .mockRejectedValueOnce(new Error('not found')) // which tailscale
+      .mockResolvedValueOnce({} as any) // which brew
       .mockResolvedValueOnce({} as any) // brew install
 
     const { checkTailscale } = await import('../../src/steps/tailscale.js')

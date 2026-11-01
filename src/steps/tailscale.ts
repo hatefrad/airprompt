@@ -45,6 +45,15 @@ export async function checkTailscale(
       return
     }
 
+    try {
+      await execa('which', ['brew'])
+    } catch {
+      fail(
+        'Homebrew not found. Install it from https://brew.sh or install Tailscale from https://tailscale.com/download, then re-run airprompt.',
+      )
+      throw new Error('brew not found')
+    }
+
     info(
       'Tailscale not found — installing via Homebrew (this may take a few minutes)...',
     )
